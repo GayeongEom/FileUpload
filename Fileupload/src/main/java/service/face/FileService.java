@@ -24,4 +24,13 @@ public interface FileService {
 	 */
 	public List<UploadFile> list();
 
+	/**
+	 * COS라이브러리를 이용한 파일 업로드 처리
+	 * 폼 필드, 파일 전부 처리 가능
+	 * 
+	 * @param req - 요청 정보 객체
+	 * @return COS파일 업로드 성공/실패 결과
+	 */
+	public boolean cosFileupload(HttpServletRequest req);
+
 }

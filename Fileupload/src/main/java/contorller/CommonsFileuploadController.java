@@ -25,7 +25,6 @@ public class CommonsFileuploadController extends HttpServlet {
 		//View 지정하고 포워드
 		req.getRequestDispatcher("/WEB-INF/views/commons/fileupload.jsp").forward(req, resp);
 		
-		
 	}
 	
 	

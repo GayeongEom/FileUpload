@@ -1,6 +1,7 @@
 package service.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
@@ -15,6 +16,10 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import com.oreilly.servlet.MultipartRequest;
+import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
+import com.oreilly.servlet.multipart.FileRenamePolicy;
 
 import common.JDBCTemplate;
 import dao.face.ParamDataDao;
@@ -328,6 +333,54 @@ public class FileServiceImpl implements FileService {
 		//이런 식으로도 가능
 //		return uploadFileDao.select(JDBCTemplate.getConnection());
 		return list;
+	}
+	
+	
+	@Override
+	public boolean cosFileupload(HttpServletRequest req) {
+
+		//multipart/form-data 형식의 요청데이터가 아닐 경우
+		if(!ServletFileUpload.isMultipartContent(req)) {
+			
+			//파일 업로드 처리 중단
+			return false;
+		}
+		
+		
+		//---- COS라이브러리를 이용한 파일 업로드 처리 ----
+		
+		//Multipart 객체의 생성자 매개변수 준비
+		//	1. 요청 정보 객체 -> req
+		
+		
+		//	2. 업로드된 파일이 저장될 경로
+		String saveDirectory = req.getServletContext().getRealPath("upload");
+		
+		File directory = new File(saveDirectory);
+		directory.mkdir();
+		
+		
+		//	3. 업로드 용량 제한 크기
+		int maxPostSize = 10 * 1024 * 1024;	//10MB
+		
+		
+		//	4. 인코딩 설정(한글 UTF-8)
+		String encoding = "UTF-8";
+		
+		
+		//	5. 중복될 파일이름을 처리하는 정책
+		FileRenamePolicy policy = new DefaultFileRenamePolicy();
+		
+		//-----------------------------------------------------------------------
+		
+		try {
+			MultipartRequest mul = new MultipartRequest(req, saveDirectory, maxPostSize, encoding, policy);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		//파일 업로드 성공
+		return true;
 	}
 	
 }
