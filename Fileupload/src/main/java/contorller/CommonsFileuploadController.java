@@ -50,7 +50,8 @@ public class CommonsFileuploadController extends HttpServlet {
 		
 		}
 		
-		
+		//리다이렉트
+		resp.sendRedirect(req.getContextPath() + "/file/list");
 		
 		
 		//파일 업로드 처리 완료

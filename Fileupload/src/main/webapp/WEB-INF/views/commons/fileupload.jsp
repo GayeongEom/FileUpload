@@ -16,7 +16,7 @@
 <hr>
 
 <!-- <form action="/commons/fileupload" method="post" enctype="application/x-www-form-urlencoded"> -->
-<form action="/commons/fileupload" method="post" enctype="multipart/form-data">
+<form action="<%=request.getContextPath() %>/commons/fileupload" method="post" enctype="multipart/form-data">
 <!-- 제목과 파일이 내용물을 같이 보냄 -->
 
 <label>제목 <input type="text" name="title"></label><br>
