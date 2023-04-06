@@ -373,11 +373,59 @@ public class FileServiceImpl implements FileService {
 		
 		//-----------------------------------------------------------------------
 		
+		MultipartRequest mul = null;
+		
 		try {
-			MultipartRequest mul = new MultipartRequest(req, saveDirectory, maxPostSize, encoding, policy);
+			mul = new MultipartRequest(req, saveDirectory, maxPostSize, encoding, policy);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		//-----------------------------------------------------------------------
+		
+		//폼필드 전달 파라미터 정보
+		
+//		String title = req.getParameter("title");
+//		String username = req.getParameter("username");
+//		String fruit = req.getParameter("fruit");
+
+		String title = mul.getParameter("title");
+		String username = mul.getParameter("username");
+		String fruit = mul.getParameter("fruit");
+		
+		System.out.println("fileService cosFileupload() - title : " + title);
+		System.out.println("fileService cosFileupload() - username : " + username);
+		System.out.println("fileService cosFileupload() - fruit : " + fruit);
+		
+		ParamData paramdata = new ParamData(0, title, username, fruit);
+		Connection conn = JDBCTemplate.getConnection();
+		paramDataDao.insert(conn, paramdata);
+		JDBCTemplate.commit(conn);
+		
+		//--------------------------------------------------------------------------------
+		
+		//파일 전달파라미터 처리
+		
+		//원본 파일 이름
+		String origin = mul.getOriginalFileName("upfile");
+		
+		//저장된 파일 이름
+		String stored = mul.getFilesystemName("upfile");
+		
+		//업로드 파일 정보 DTO객체
+		UploadFile uploadFile = new UploadFile(0, origin, stored);
+		
+		//--------------------------------------------------------------------------------
+
+		//DB처리
+		int res = uploadFileDao.insert(conn, uploadFile);
+		if(res>0) {
+			JDBCTemplate.commit(conn);
+		} else {
+			JDBCTemplate.rollback(conn);
+		}
+		
+		//--------------------------------------------------------------------------------
 		
 		//파일 업로드 성공
 		return true;
