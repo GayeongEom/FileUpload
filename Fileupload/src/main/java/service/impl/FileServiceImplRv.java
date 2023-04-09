@@ -17,11 +17,18 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import common.JDBCTemplate;
+import dao.face.ParamDataDaoRv;
+import dao.face.UploadFileDaoRv;
+import dao.impl.ParamDataDaoImplRv;
+import dao.impl.UploadFileDaoImplRv;
 import dto.ParamData;
 import dto.UploadFile;
 import service.face.FileServiceRv;
 
 public class FileServiceImplRv implements FileServiceRv {
+	
+	private ParamDataDaoRv paramDataDao = new ParamDataDaoImplRv();
+	private UploadFileDaoRv uploadFileDao = new UploadFileDaoImplRv();
 	
 	@Override
 	public boolean fileupload(HttpServletRequest req) {
@@ -97,6 +104,7 @@ public class FileServiceImplRv implements FileServiceRv {
 		
 		//!!!!업로드 허용은 10MB까지고 1MB까지는 메모리에서 그 이상은 하드디스크에서 처리한다는건가?
 		
+		
 		//최대 업로드 허용 사이즈 설정
 		int maxFile = 10 * 1024 * 1024; //10MB
 		upload.setFileSizeMax(maxFile);
@@ -137,8 +145,7 @@ public class FileServiceImplRv implements FileServiceRv {
 		//		- 빈 파일 : 용량이 0인 파일
 		//		- 폼 필드, form-data : 일반적인 전달 파라미터 -> 전달된 데이터들의 DB에 INSERT함
 		//		- 파일 -> 크게 두 가지 방법이 있음		!!!!2가지 방법이란게 무슨 말이지
-		//			파일은 디스크에 저장
-		//			웹 서버의 로컬 폴더
+		//			파일은 디스크에 저장 -> 웹 서버의 로컬 폴더
 		//			파일의 정보는 DB에 INSERT 함
 		
 		//폼필드 전달 파라미터를 저장할 DTO 객체
@@ -147,7 +154,7 @@ public class FileServiceImplRv implements FileServiceRv {
 		//파일 정보를 저장할 DTO 객체
 		UploadFile uploadFile = new UploadFile();
 		
-		//파일아이템의 리스트 반복자
+		//파일아이템의 리스트 반복자 -> 인덱스가 없어서..?
 		Iterator<FileItem> iter = items.iterator();		//!!!!iterator는 왜 필요하지
 		
 		while(iter.hasNext()) {
@@ -257,7 +264,21 @@ public class FileServiceImplRv implements FileServiceRv {
 		int res = 0;
 		
 		//폼필드 데이터 삽입
-		//Dao 만들어야해~
+		res += paramDataDao.insert(conn, paramData);
+		
+		//파일 데이터 삽입
+		res += uploadFileDao.insert(conn, uploadFile);
+		
+		System.out.println("서비스임플 결과" + res);
+		
+		
+		if(res<2) {
+			//두 insert 중 하나라도 실패했을 경우
+			JDBCTemplate.rollback(conn);
+		} else {
+			//두 insert 모두 성공했을 경우
+			JDBCTemplate.commit(conn);
+		}
 		
 		
 		//파일 업로드 처리 완료

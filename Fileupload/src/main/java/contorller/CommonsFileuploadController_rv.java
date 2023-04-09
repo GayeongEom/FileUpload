@@ -36,6 +36,16 @@ public class CommonsFileuploadController_rv extends HttpServlet {
 		
 		//파일 업로드 처리
 		boolean result = fileServiceRv.fileupload(req);
+		
+		System.out.println(result);
+		
+		if(!result) {
+			req.getRequestDispatcher("/WEB-INF/views/commons/error_rv.jsp").forward(req, resp);
+			
+			return;
+		}
+		
+		//!!!처리는 다 되는데 왜 DB에 안들어갈까..?
 	
 	}
 
